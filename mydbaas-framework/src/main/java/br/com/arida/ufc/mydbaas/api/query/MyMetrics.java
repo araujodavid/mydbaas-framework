@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import main.java.br.com.arida.ufc.mydbaas.api.client.MyDBaaSClient;
 import main.java.br.com.arida.ufc.mydbaas.common.metric.common.AbstractMetric;
+import main.java.br.com.arida.ufc.mydbaas.common.resource.common.AbstractEntity;
 import main.java.br.com.arida.ufc.mydbaas.util.SendResquest;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -46,13 +47,29 @@ public class MyMetrics {
 	 * @param endDatetime
 	 * @return an metric object
 	 */
-	public Object getMetricSingle(Class<?> metricClazz, String metricType, String resourceType, int resourceID, String startDatetime, String endDatetime) {		
+	public Object getMetricSingle(Class<?> metricClazz, Object resource, String startDatetime, String endDatetime) {
+		Method getId = null;
+		try {
+			getId = AbstractEntity.class.getDeclaredMethod("getId", null);
+		} catch (NoSuchMethodException e2) {
+			e2.printStackTrace();
+		} catch (SecurityException e2) {
+			e2.printStackTrace();
+		}
 		List<NameValuePair> parameters = new ArrayList<NameValuePair>();
-		parameters.add(new BasicNameValuePair("metricName", metricClazz.getName()));
-		parameters.add(new BasicNameValuePair("resourceType", resourceType));
-		parameters.add(new BasicNameValuePair("metricType", metricType));
+		parameters.add(new BasicNameValuePair("metric", metricClazz.getName()));
+		parameters.add(new BasicNameValuePair("resourceType", resource.toString()));
+		//parameters.add(new BasicNameValuePair("metricType", metricType));
 		parameters.add(new BasicNameValuePair("queryType", "0"));
-		parameters.add(new BasicNameValuePair("resourceID", String.valueOf(resourceID)));
+		try {
+			parameters.add(new BasicNameValuePair("resourceID", String.valueOf(getId.invoke(resource, null))));
+		} catch (IllegalAccessException e1) {
+			e1.printStackTrace();
+		} catch (IllegalArgumentException e1) {
+			e1.printStackTrace();
+		} catch (InvocationTargetException e1) {
+			e1.printStackTrace();
+		}
 		
 		if (startDatetime != null && !startDatetime.trim().equals("")) {
 			parameters.add(new BasicNameValuePair("startDatetime", startDatetime));
@@ -144,12 +161,28 @@ public class MyMetrics {
 	 * @param endDatetime
 	 * @return a json of the metric list
 	 */
-	public List<Object> getMetricCollection(Class<?> metricClazz, String metricType, String resourceType, int resourceID, String startDatetime, String endDatetime) {		
+	public List<Object> getMetricCollection(Class<?> metricClazz, Object resource, String startDatetime, String endDatetime) {
+		Method getId = null;
+		try {
+			getId = AbstractEntity.class.getDeclaredMethod("getId", null);
+		} catch (NoSuchMethodException e2) {
+			e2.printStackTrace();
+		} catch (SecurityException e2) {
+			e2.printStackTrace();
+		}
 		List<NameValuePair> parameters = new ArrayList<NameValuePair>();
 		parameters.add(new BasicNameValuePair("metricName", metricClazz.getName()));
-		parameters.add(new BasicNameValuePair("resourceType", resourceType));
-		parameters.add(new BasicNameValuePair("metricType", metricType));
-		parameters.add(new BasicNameValuePair("resourceID", String.valueOf(resourceID)));
+		parameters.add(new BasicNameValuePair("resourceType", resource.toString()));
+		//parameters.add(new BasicNameValuePair("metricType", metricType));
+		try {
+			parameters.add(new BasicNameValuePair("resourceID", String.valueOf(getId.invoke(resource, null))));
+		} catch (IllegalAccessException e1) {
+			e1.printStackTrace();
+		} catch (IllegalArgumentException e1) {
+			e1.printStackTrace();
+		} catch (InvocationTargetException e1) {
+			e1.printStackTrace();
+		}
 		
 		if (startDatetime != null && !startDatetime.trim().equals("")) {
 			parameters.add(new BasicNameValuePair("startDatetime", startDatetime));
